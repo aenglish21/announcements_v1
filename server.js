@@ -13,21 +13,25 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Ensure data directory exists
-if (!fs.existsSync(path.join(__dirname, 'data'))) {
-    fs.mkdirSync(path.join(__dirname, 'data'));
-}
-
-// Initialize data file if it doesn't exist
-if (!fs.existsSync(DATA_FILE)) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify([
-        {
-            id: 1,
-            title: 'Welcome to Announcements',
-            content: 'This is your first announcement. Edit it from the admin panel.',
-            date: new Date().toISOString(),
-            active: true
-        }
-    ], null, 2));
+try {
+    if (!fs.existsSync(path.join(__dirname, 'data'))) {
+        fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
+    }
+    // Initialize data file if it doesn't exist
+    if (!fs.existsSync(DATA_FILE)) {
+        fs.writeFileSync(DATA_FILE, JSON.stringify([
+            {
+                id: 1,
+                title: 'Welcome to Announcements',
+                content: 'This is your first announcement. Edit it from the admin panel.',
+                date: new Date().toISOString(),
+                active: true
+            }
+        ], null, 2));
+    }
+    console.log('Data directory initialized successfully');
+} catch (err) {
+    console.error('Error initializing data directory:', err);
 }
 
 // Helper functions
@@ -113,12 +117,22 @@ app.delete('/api/admin/announcements/:id', (req, res) => {
 
 // Serve main page
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.send('<h1>Announcements</h1><p>Static files not found. Check deployment.</p><a href="/admin">Admin</a>');
+    }
 });
 
 // Serve admin page
 app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+    const adminPath = path.join(__dirname, 'public', 'admin.html');
+    if (fs.existsSync(adminPath)) {
+        res.sendFile(adminPath);
+    } else {
+        res.send('<h1>Admin</h1><p>Static files not found. Check deployment.</p>');
+    }
 });
 
 // Health check endpoint
