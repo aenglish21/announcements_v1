@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: announcements
-          image: announcements-app:latest
+          image: ghcr.io/aenglish21/announcements-app:latest
           ports:
             - containerPort: 3000
           env:
