@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Announcements</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        h1 {
+            color: #333;
+            font-size: 2rem;
+        }
+        .back-link {
+            background: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        .back-link:hover {
+            background: #5a6268;
+        }
+        .section {
+            background: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #007bff;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            margin-right: 10px;
+        }
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f8f9fa;
+            color: #333;
+            font-weight: 600;
+        }
+        tr:hover {
+            background: #f8f9fa;
+        }
+        .status-active {
+            color: #28a745;
+            font-weight: 500;
+        }
+        .status-inactive {
+            color: #dc3545;
+            font-weight: 500;
+        }
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        .actions .btn {
+            padding: 5px 12px;
+            font-size: 0.85rem;
+            margin: 0;
+        }
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        #editSection {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Admin Panel</h1>
+            <a href="/" class="back-link">View Announcements</a>
+        </header>
+
+        <div id="message"></div>
+
+        <!-- Create/Edit Form -->
+        <div class="section" id="formSection">
+            <h2 id="formTitle">Create New Announcement</h2>
+            <form id="announcementForm">
+                <input type="hidden" id="announcementId">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" required placeholder="Enter announcement title">
+                </div>
+                <div class="form-group">
+                    <label for="content">Content</label>
+                    <textarea id="content" required placeholder="Enter announcement content"></textarea>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="active" checked>
+                        <label for="active">Active (visible to users)</label>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Create Announcement</button>
+                    <button type="button" class="btn btn-secondary" id="cancelBtn" style="display:none" onclick="cancelEdit()">Cancel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Announcements List -->
+        <div class="section">
+            <h2>All Announcements</h2>
+            <table id="announcementsTable">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="announcementsList">
+                    <tr><td colspan="4">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let editingId = null;
+
+        async function loadAnnouncements() {
+            try {
+                const response = await fetch('/api/admin/announcements');
+                const announcements = await response.json();
+                const tbody = document.getElementById('announcementsList');
+
+                if (announcements.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4">No announcements yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = announcements
+                    .sort((a, b) => new Date(b.date) - new Date(a.date))
+                    .map(a => `
+                        <tr>
+                            <td>${escapeHtml(a.title)}</td>
+                            <td>${formatDate(a.date)}</td>
+                            <td class="${a.active ? 'status-active' : 'status-inactive'}">
+                                ${a.active ? 'Active' : 'Inactive'}
+                            </td>
+                            <td class="actions">
+                                <button class="btn btn-primary" onclick="editAnnouncement(${a.id})">Edit</button>
+                                <button class="btn btn-danger" onclick="deleteAnnouncement(${a.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error loading announcements', 'error');
+            }
+        }
+
+        async function editAnnouncement(id) {
+            try {
+                const response = await fetch(`/api/admin/announcements/${id}`);
+                const announcement = await response.json();
+
+                editingId = id;
+                document.getElementById('announcementId').value = id;
+                document.getElementById('title').value = announcement.title;
+                document.getElementById('content').value = announcement.content;
+                document.getElementById('active').checked = announcement.active;
+
+                document.getElementById('formTitle').textContent = 'Edit Announcement';
+                document.getElementById('submitBtn').textContent = 'Update Announcement';
+                document.getElementById('cancelBtn').style.display = 'inline-block';
+
+                document.getElementById('formSection').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error loading announcement', 'error');
+            }
+        }
+
+        function cancelEdit() {
+            editingId = null;
+            document.getElementById('announcementForm').reset();
+            document.getElementById('announcementId').value = '';
+            document.getElementById('formTitle').textContent = 'Create New Announcement';
+            document.getElementById('submitBtn').textContent = 'Create Announcement';
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('active').checked = true;
+        }
+
+        async function deleteAnnouncement(id) {
+            if (!confirm('Are you sure you want to delete this announcement?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/announcements/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('Announcement deleted successfully', 'success');
+                    loadAnnouncements();
+                    if (editingId === id) {
+                        cancelEdit();
+                    }
+                } else {
+                    showMessage('Error deleting announcement', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error deleting announcement', 'error');
+            }
+        }
+
+        document.getElementById('announcementForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const data = {
+                title: document.getElementById('title').value,
+                content: document.getElementById('content').value,
+                active: document.getElementById('active').checked
+            };
+
+            try {
+                const url = editingId
+                    ? `/api/admin/announcements/${editingId}`
+                    : '/api/admin/announcements';
+                const method = editingId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showMessage(
+                        editingId ? 'Announcement updated successfully' : 'Announcement created successfully',
+                        'success'
+                    );
+                    cancelEdit();
+                    loadAnnouncements();
+                } else {
+                    showMessage('Error saving announcement', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('Error saving announcement', 'error');
+            }
+        });
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+            setTimeout(() => {
+                messageDiv.innerHTML = '';
+            }, 3000);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        loadAnnouncements();
+    </script>
+</body>
+</html>
