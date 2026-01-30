@@ -121,6 +121,11 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+});
+
 app.listen(PORT, () => {
     console.log(`Announcements server running on port ${PORT}`);
 });
